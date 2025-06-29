@@ -2,296 +2,197 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Navigator</title>
-  <link rel="manifest" href="manifest.json"> <!-- Link to manifest.json -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css">
   <style>
-    /* Root variables for light and dark themes */
     :root {
-      --bg: #fff;
-      --text: #333; /* Darker text for readability */
-      --accent: #2196f3; /* Blue */
-      --accent-dark: #1976d2; /* Darker blue for hover/active */
-      --panel-bg: rgba(255,255,255,0.9);
-      --border-color: #ddd;
-      --favorite-bg: #e3f2fd;
-      --highlight-bg: #f0f8ff; /* Light blue for speaking step */
+      --bg: #ffffff;
+      --text: #333333;
+      --accent: #2196f3;
+      --accent-dark: #1976d2;
+      --panel-bg: rgba(255, 255, 255, 0.95);
+      --border-color: #dddddd;
+      --highlight-bg: #e3f2fd;
     }
     body.dark {
       --bg: #121212;
-      --text: #eee;
-      --accent: #90caf9; /* Lighter blue for dark mode */
-      --accent-dark: #64b5f6; /* Darker accent for dark mode */
-      --panel-bg: rgba(30,30,30,0.9);
-      --border-color: #444;
-      --favorite-bg: #263238; /* Darker grey for favorites */
-      --highlight-bg: #3f51b5; /* Darker blue for speaking step */
+      --text: #eeeeee;
+      --accent: #90caf9;
+      --accent-dark: #64b5f6;
+      --panel-bg: rgba(30, 30, 30, 0.9);
+      --border-color: #444444;
+      --highlight-bg: #3f51b5;
     }
-
-    /* Global styles */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; } /* Ensure body doesn't scroll */
-
-    /* Map styles */
-    #map { height: 100%; width: 100%; position: absolute; top: 0; left: 0; }
-
-    /* Sidebar styles */
-    #sidebar {
-      position: absolute; left: -320px; top: 0;
-      width: 320px; height: 100vh; background: var(--bg);
-      box-shadow: 2px 0 10px rgba(0,0,0,0.3); /* Stronger shadow */
-      transition: left 0.3s ease-in-out; /* Smooth transition */
-      padding: 1.5rem 1rem; /* More vertical padding */
-      display: flex; flex-direction: column;
-      z-index: 1000;
-      border-right: 1px solid var(--border-color); /* Subtle border */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
     }
-    #sidebar.open { left: 0; }
-
-    /* Toggle button for sidebar */
+    #map {
+      height: 100%;
+      width: 100%;
+    }
     #toggleBtn {
-      position: absolute; top: 15px; left: 15px; z-index: 1100;
-      background: var(--accent); color: white; border: none;
-      padding: 0.6rem 0.8rem; /* Larger padding */
-      font-size: 1.4rem; /* Larger icon */
-      border-radius: 8px; /* More rounded corners */
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 1100;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      font-size: 20px;
+      border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow */
-      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    #toggleBtn:hover {
-      background: var(--accent-dark);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    #sidebar {
+      position: absolute;
+      left: -320px;
+      top: 0;
+      width: 320px;
+      height: 100%;
+      background: var(--panel-bg);
+      padding: 1rem;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+      z-index: 1050;
+      transition: left 0.3s ease-in-out;
+      overflow-y: auto;
     }
-
-    /* Input and button common styles within sidebar */
+    #sidebar.open {
+      left: 0;
+    }
     #sidebar input, #sidebar button, #sidebar select {
-      width: 100%; margin-bottom: 0.8rem; /* Slightly more margin */
-      padding: 0.6rem; /* Larger padding */
-      border: 1px solid var(--border-color);
-      border-radius: 6px; /* More rounded */
+      width: 100%;
+      margin-bottom: 0.8rem;
+      padding: 0.6rem;
       font-size: 1rem;
-      background-color: var(--bg); /* Ensure background matches theme */
-      color: var(--text); /* Ensure text color matches theme */
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg);
+      color: var(--text);
     }
-    #sidebar button, #sidebar select {
-      background: var(--accent); color: white; border: none; cursor: pointer;
+    #sidebar button {
+      background: var(--accent);
+      color: white;
+      border: none;
       font-weight: bold;
-      transition: background 0.2s, transform 0.1s;
+      cursor: pointer;
     }
     #sidebar button:hover {
       background: var(--accent-dark);
-      transform: translateY(-1px); /* Slight lift effect */
     }
-    #sidebar button:active {
-      transform: translateY(0);
-    }
-    #sidebar button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background: var(--accent); /* Keep base accent color */
-    }
-
-    /* Favorites list styling */
-    #favoritesList { list-style:none; margin-bottom:1rem; padding: 0; }
-    #favoritesList li {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.7rem; margin-bottom:0.6rem;
-      border-radius: 6px;
-      background: var(--favorite-bg);
-      color: var(--text); /* Ensure favorite text color matches theme */
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      transition: background 0.2s, transform 0.1s;
-      border: 1px solid var(--border-color); /* Add border */
-    }
-    #favoritesList li:hover {
-      background: var(--highlight-bg); /* Highlight on hover */
-      transform: translateY(-2px);
-    }
-    #favoritesList li span.text { flex: 1; margin-right: 10px; }
-    #favoritesList li button {
-        background: none; border: none; color: red;
-        font-size: 1.2em; cursor: pointer; padding: 0 5px;
-        transition: transform 0.1s;
-        width: auto; /* Override sidebar button width */
-        margin-bottom: 0; /* Override sidebar button margin */
-    }
-    #favoritesList li button:hover {
-        transform: scale(1.1);
-        background: none;
-    }
-    #favoritesList li button:active {
-        transform: scale(0.9);
-    }
-
-    /* Flex container for grouped buttons */
     .button-group {
-      display:flex;
-      gap:5px; /* Consistent gap */
-      margin-bottom: 0.8rem;
-    }
-    .button-group button {
-      flex:1; /* Distribute space evenly */
-    }
-
-
-    /* --- UPDATED CSS FOR DIRECTIONS PANELS --- */
-
-    /* Hide the default Leaflet Routing Machine control panel */
-    .leaflet-routing-container {
-        display: none !important;
-    }
-
-    /* Directions Panel Styling */
-    #directionsPanel {
-      position: absolute; bottom: -100%; left: 0; width: 100%; /* Start completely off screen */
-      background: var(--panel-bg);
-      box-shadow: 0 -5px 15px rgba(0,0,0,0.4); /* Stronger shadow */
-      transition: bottom 0.4s ease-out; /* Slower, smoother transition */
-      max-height: 35%; /* Max height of the panel */
-      min-height: 80px; /* Minimum visible height */
-      overflow-y: auto; /* Scroll if content exceeds max-height */
-      z-index: 1000;
-      padding: 1rem 1.5rem; /* More generous padding */
-      border-top: 1px solid var(--border-color); /* Top border */
-    }
-    #directionsPanel.open { bottom: 0; } /* Slide up completely */
-
-    /* Individual Direction Step Styling */
-    .dir-step {
       display: flex;
+      gap: 0.5rem;
+    }
+    #directionsPanel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      max-width: 350px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      z-index: 1050;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    #directionsPanel header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.8rem; /* More space between steps */
-      line-height: 1.4; /* Better readability */
-      padding: 0.8rem; /* Padding inside each step */
-      border-radius: 8px; /* Rounded corners for steps */
-      background-color: rgba(255,255,255,0.05); /* Subtle background for steps */
-      transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      border: 1px solid rgba(255,255,255,0.1); /* Subtle border for each step */
-      cursor: pointer;
+      margin-bottom: 1rem;
     }
-    body.dark .dir-step {
-      background-color: rgba(0,0,0,0.1); /* Darker subtle background in dark mode */
-      border: 1px solid rgba(255,255,255,0.05);
+    .dir-step {
+      background: var(--highlight-bg);
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
     }
-
-    .dir-step:hover {
-      background-color: rgba(255,255,255,0.15); /* Slightly brighter on hover */
-      transform: translateY(-2px); /* Slight lift effect */
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    }
-    body.dark .dir-step:hover {
-      background-color: rgba(0,0,0,0.2);
-    }
-
-    /* Styling for the currently spoken direction step */
-    .dir-step.speaking-step {
-        background-color: var(--highlight-bg); /* Distinct highlight color */
-        color: var(--text); /* Ensure text is readable on highlight */
-        font-weight: bold;
-        transform: scale(1.02); /* Slightly larger */
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        border-color: var(--accent); /* Accent border */
-    }
-    body.dark .dir-step.speaking-step {
-        color: var(--text); /* Ensure text readable on highlight */
-    }
-
-
-    .dir-step span.icon {
-      width:30px; height:30px; /* Larger icons */
-      min-width: 30px; /* Prevent shrinking */
-      margin-right:12px; /* More space */
-      display:flex; justify-content:center; align-items:center;
-      font-size: 1.5rem; /* Emoji size */
-      border-radius: 50%; /* Circular background for icons */
-      background-color: rgba(0,0,0,0.05); /* Subtle icon background */
-      flex-shrink: 0; /* Prevent icon from shrinking */
-    }
-    body.dark .dir-step span.icon {
-      background-color: rgba(255,255,255,0.05);
-    }
-
-    .dir-step span.text { flex:1; }
-
-    /* QR Modal Styling */
     #qrModal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
-        z-index: 2000; /* Highest z-index */
-        display: flex; /* Use flexbox to center content */
-        justify-content: center;
-        align-items: center;
-        visibility: hidden; /* Start hidden */
-        opacity: 0; /* Start transparent */
-        transition: visibility 0.3s, opacity 0.3s; /* Smooth show/hide */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0.3s, opacity 0.3s;
     }
     #qrModal.open {
-        visibility: visible;
-        opacity: 1;
+      visibility: visible;
+      opacity: 1;
     }
-
     #qrCanvas {
-        background: white;
-        padding: 1.5rem; /* More padding */
-        border-radius: 12px; /* More rounded */
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4); /* Stronger shadow */
-        max-width: 90%; /* Responsive max width */
-        max-height: 90%; /* Responsive max height */
-        border: 1px solid #eee; /* Light border */
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
-
-    /* Font for Inter */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text);
+      margin-top: 1rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <button id="toggleBtn" aria-label="Toggle Sidebar">☰</button>
-
+  <button id="toggleBtn">☰</button>
   <div id="sidebar">
-    <input id="from" placeholder="From (e.g. NC State Main Campus)">
-    <input id="to" placeholder="To (e.g. Engineering Building II)">
+    <input id="from" placeholder="From (e.g. Home)">
+    <input id="to" placeholder="To (e.g. Work)">
     <div class="button-group">
       <button id="useLoc">📍 My Location</button>
-      <button id="saveFav" title="Save Current Route as Favorite">⭐</button>
+      <button id="saveFav">⭐</button>
     </div>
     <button id="getRoute">🚗 Get Directions</button>
     <div class="button-group">
-      <button id="altRoute" title="Toggle Alternative Routes">🔀 Alt Route</button>
-      <button id="qrBtn" title="Generate QR Code for Route">🔗 QR</button>
-      <button id="shareBtn" title="Copy Shareable Link">📤</button>
+      <button id="altRoute">🔀 Alt Route</button>
+      <button id="qrBtn">🔗 QR</button>
+      <button id="shareBtn">📤</button>
     </div>
-      <footer style="text-align:center; padding:1rem; background:#f2f2f2; color:#333; font-size: 0.9rem;">
-  © 2024-2025 All rights reserved | By <a href="https://chrohail.com" target="_blank" style="color:#2196f3; text-decoration:none;">chrohail.com</a>
-</footer>
-
-    <label for="voiceLang" style="font-size:0.9rem; margin-bottom: 0.5rem; display:block;">Voice Language for Directions:</label>
+    <label for="voiceLang">Voice Language:</label>
     <select id="voiceLang">
       <option value="en-US">English</option>
       <option value="es-ES">Español</option>
       <option value="ur-PK">اردو</option>
-      <option value="fr-FR">Français</option>
-      <option value="de-DE">Deutsch</option>
     </select>
     <button id="themeBtn">🌗 Toggle Theme</button>
-    <h4 style="margin-top:1.5rem; margin-bottom:0.8rem;">Favorites</h4>
+    <h4>Favorites</h4>
     <ul id="favoritesList"></ul>
+    <footer>
+      © 2024-2025 All rights reserved | <a href="https://chrohail.com" target="_blank">chrohail.com</a>
+    </footer>
   </div>
 
-  <div id="directionsPanel"></div>
+  <div id="directionsPanel">
+    <header>
+      <strong>Directions</strong>
+      <button onclick="document.getElementById('directionsPanel').style.display='none'">❌</button>
+    </header>
+    <div id="stepContainer"></div>
+  </div>
 
-  <!-- QR Modal. Use JS to control its 'open' class -->
-  <div id="qrModal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
-    <h3 id="qrModalTitle" style="display:none;">QR Code for Route</h3>
+  <div id="qrModal">
     <canvas id="qrCanvas"></canvas>
   </div>
 
