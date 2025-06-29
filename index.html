@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NC State Directions App with Smart Features</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<style>
+  * { box-sizing: border-box; }
+  body, html {
+    margin: 0;
+    height: 100%;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f5;
+  }
+  #map { height: 60vh; width: 100%; }
+  #container { display: flex; gap: 10px; padding: 10px; }
+  #controls {
+    width: 320px;
+    background: #fff;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+  }
+  input, button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  button {
+    background: #2196f3;
+    color: white;
+    cursor: pointer;
+  }
+  button:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+  }
+  .autocomplete-items {
+    position: absolute;
+    background: white;
+    z-index: 999;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    width: 100%;
+  }
+  .autocomplete-item {
+    padding: 8px;
+    cursor: pointer;
+  }
+  .autocomplete-item:hover {
+    background-color: #eee;
+  }
+  #instructions { max-height: 30vh; overflow-y: auto; }
+  .instruction-step {
+    padding: 6px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+  }
+  .instruction-step.highlight { background-color: #d1f7d1; }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="controls">
+    <input id="fromInput" placeholder="From (e.g. NC State Main Campus)" autocomplete="off">
+    <div id="fromAutocomplete" class="autocomplete-items"></div>
+    <input id="toInput" placeholder="To (e.g. Engineering Building II)" autocomplete="off">
+    <div id="toAutocomplete" class="autocomplete-items"></div>
+    <button id="routeBtn" disabled>🚗 Get Directions</button>
+    <button id="liveLocationBtn">📍 Use My Location as Start</button>
+    <button id="voiceBtn" disabled>▶️ Voice Guidance</button>
+    <button id="altRouteBtn" disabled>🔀 Show Alternative Route</button>
+    <button id="qrBtn" style="background:#4CAF50;">🔗 Generate Route QR</button>
+    <div id="instructions">
+      <h3>Directions:</h3>
+      <div id="stepsList"></div>
+    </div>
+    <canvas id="qrCanvas" style="margin-top:10px;"></canvas>
+  </div>
+  <div id="map"></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+
+      <script src="script.js"></script>
+
+</body>
+</html>
