@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Navigator</title>
+ <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #222;
+      --accent: #007bff;
+      --panel: rgba(255,255,255,0.95);
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --accent: #90caf9;
+      --panel: rgba(30,30,30,0.95);
+    }
+
+    body, html {
+      margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text);
+      font-family: sans-serif;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+
+    #sidebar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100%;
+      background: var(--panel);
+      padding: 12px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: left 0.3s ease-in-out;
+      overflow-y: auto;
+    }
+
+    #sidebar.closed {
+      left: -280px;
+    }
+
+    #toggleSidebar {
+      position: absolute;
+      top: 10px;
+      left: 280px;
+      z-index: 1100;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    #sidebar.closed + #toggleSidebar {
+      left: 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    #sidebar input,
+    #sidebar select,
+    #sidebar button {
+      width: 100%;
+      margin: 6px 0;
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #sidebar button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    #instructionBox {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      padding: 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.25);
+      z-index: 1100;
+      font-size: 1em;
+      display: none;
+    }
+
+    .leaflet-routing-container {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h3>Smart Nav</h3>
+    <input id="from" placeholder="From address" />
+    <button id="locateBtn">📍 Use Current Location</button>
+    <input id="to" placeholder="To address" />
+    <button id="routeBtn">🧭 Get Directions</button>
+    <select id="mapType">
+      <option value="normal">🗺️ Map</option>
+      <option value="satellite">🛰️ Satellite</option>
+    </select>
+    <button id="themeBtn">🌙 Toggle Dark</button>
+  </div>
+  <button id="toggleSidebar">❮</button>
+  <div id="map"></div>
+  <div id="instructionBox"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+  <script src="https://unpkg.com/leaflet-providers@1.13.0/leaflet-providers.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
